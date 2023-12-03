@@ -48,12 +48,13 @@ export const Login: React.FC<{}> = ({}) => {
             if (response.data?.login.errors) {
               setErrors(toErrorMap(response.data.login.errors));
             } else if (response.data?.login.user) {
-              // if (typeof router.query.next === "string") {
-              //   router.push(router.query.next);
-              // } else {
-              //   router.push("/");
-              // }
-              router.push("/TwoFactorSetup");
+              // If a twoFactorToken was provided, navigate to the home page
+              if (values.twoFactorToken) {
+                router.push("/");
+              } else {
+                // If no twoFactorToken was provided, navigate to TwoFactorSetup
+                router.push("/TwoFactorSetup");
+              }
             }
           }}
         >

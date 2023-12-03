@@ -244,26 +244,6 @@ export class UserResolver {
       };
     }
 
-    // 2FA verification
-    // if (user.twoFactorAuthSecret && twoFactorToken) {
-    //   const isTokenValid = speakeasy.totp.verify({
-    //     secret: user.twoFactorAuthSecret,
-    //     encoding: "base32",
-    //     token: twoFactorToken,
-    //   });
-
-    //   if (!isTokenValid) {
-    //     return {
-    //       errors: [
-    //         {
-    //           field: "twoFactorToken",
-    //           message: "Invalid two-factor token",
-    //         },
-    //       ],
-    //     };
-    //   }
-    // }
-
     // Check if 2FA is enabled for the user
     if (user.isTwoFactorEnabled) {
       // If 2FA is enabled, require the twoFactorToken
