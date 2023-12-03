@@ -199,6 +199,7 @@ export type User = {
   email: Scalars['String'];
   createdAt: Scalars['String'];
   updatedAt: Scalars['String'];
+  isTwoFactorEnabled: Scalars['Boolean'];
 };
 
 export type UserResponse = {
@@ -238,7 +239,7 @@ export type RegularErrorFragment = (
 
 export type RegularUserFragment = (
   { __typename?: 'User' }
-  & Pick<User, 'id' | 'username'>
+  & Pick<User, 'id' | 'username' | 'isTwoFactorEnabled'>
 );
 
 export type RegularUserResponseFragment = (
@@ -534,6 +535,7 @@ export const RegularUserFragmentDoc = gql`
     fragment RegularUser on User {
   id
   username
+  isTwoFactorEnabled
 }
     `;
 export const RegularUserResponseFragmentDoc = gql`

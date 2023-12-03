@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import {
   useSetupTwoFactorAuthMutation,
   useVerifyTwoFactorTokenMutation,
+  useMeQuery,
 } from "../generated/graphql";
 import { withApollo } from "../util/withApollo";
 
@@ -11,18 +12,32 @@ const TwoFactorSetup = () => {
   const [twoFactorCode, setTwoFactorCode] = useState("");
   const [setupTwoFactorAuth] = useSetupTwoFactorAuthMutation();
   const [verifyTwoFactorToken] = useVerifyTwoFactorTokenMutation();
+  const { data: meData } = useMeQuery(); // Fetch current user data
   const router = useRouter();
 
-  useEffect(() => {
-    const setup2FA = async () => {
-      const response = await setupTwoFactorAuth();
-      if (response.data && response.data.setupTwoFactorAuth) {
-        setQrCodeUrl(response.data.setupTwoFactorAuth);
-      }
-    };
+  //   useEffect(() => {
+  //     const setup2FA = async () => {
+  //       const response = await setupTwoFactorAuth();
+  //       if (response.data && response.data.setupTwoFactorAuth) {
+  //         setQrCodeUrl(response.data.setupTwoFactorAuth);
+  //       }
+  //     };
 
-    setup2FA();
-  }, [setupTwoFactorAuth]);
+  //     setup2FA();
+  //   }, [setupTwoFactorAuth]);
+
+  useEffect(() => {
+    if (!meData?.me?.isTwoFactorEnabled) {
+      // User hasn't set up 2FA, generate QR code
+      const setup2FA = async () => {
+        const response = await setupTwoFactorAuth();
+        if (response.data && response.data.setupTwoFactorAuth) {
+          setQrCodeUrl(response.data.setupTwoFactorAuth);
+        }
+      };
+      setup2FA();
+    }
+  }, [setupTwoFactorAuth, meData]);
 
   const handleVerifyCode = async () => {
     try {
@@ -45,27 +60,60 @@ const TwoFactorSetup = () => {
   };
 
   return (
+    // <div>
+    //   <h1>Setup Two-Factor Authentication</h1>
+    //   {qrCodeUrl ? (
+    //     <div>
+    //       <p>Scan this QR code with your Google Authenticator app:</p>
+    //       <img src={qrCodeUrl} alt="Two-Factor Authentication QR Code" />
+    //       <input
+    //         type="text"
+    //         value={twoFactorCode}
+    //         onChange={(e) => setTwoFactorCode(e.target.value)}
+    //         placeholder="Enter 2FA code"
+    //       />
+    //       <button onClick={handleVerifyCode}>Verify Code</button>
+    //     </div>
+    //   ) : (
+    //     <p>Loading...</p>
+    //   )}
+    // </div>
+    // <div>
+    //   <h1>Two-Factor Authentication</h1>
+    //   {!meData?.me?.isTwoFactorEnabled && qrCodeUrl ? (
+    //     <div>
+    //       <p>Scan this QR code with your Google Authenticator app:</p>
+    //       <img src={qrCodeUrl} alt="Two-Factor Authentication QR Code" />
+    //     </div>
+    //   ) : (
+    //     <div>
+    //       <input
+    //         type="text"
+    //         value={twoFactorCode}
+    //         onChange={(e) => setTwoFactorCode(e.target.value)}
+    //         placeholder="Enter 2FA code"
+    //       />
+    //       <button onClick={handleVerifyCode}>Verify Code</button>
+    //     </div>
+    //   )}
+    // </div>
     <div>
-      <h1>Setup Two-Factor Authentication</h1>
-      {qrCodeUrl ? (
-        // <div>
-        //   <p>Scan this QR code with your Google Authenticator app:</p>
-        //   <img src={qrCodeUrl} alt="Two-Factor Authentication QR Code" />
-        // </div>
+      <h1>Two-Factor Authentication</h1>
+      {!meData?.me?.isTwoFactorEnabled && qrCodeUrl && (
         <div>
           <p>Scan this QR code with your Google Authenticator app:</p>
           <img src={qrCodeUrl} alt="Two-Factor Authentication QR Code" />
-          <input
-            type="text"
-            value={twoFactorCode}
-            onChange={(e) => setTwoFactorCode(e.target.value)}
-            placeholder="Enter 2FA code"
-          />
-          <button onClick={handleVerifyCode}>Verify Code</button>
         </div>
-      ) : (
-        <p>Loading...</p>
       )}
+      <div>
+        <input
+          type="text"
+          value={twoFactorCode}
+          onChange={(e) => setTwoFactorCode(e.target.value)}
+          placeholder="Enter 2FA code"
+        />
+        <button onClick={handleVerifyCode}>Verify Code</button>
+      </div>
     </div>
   );
 };
